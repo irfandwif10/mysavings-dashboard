@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tugas Akhir - Sistem Informasi Manajemen Finansial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans overflow-x-hidden">
+
+    <section id="halaman-login" class="min-h-screen bg-slate-950 flex items-center justify-center relative p-4 overflow-hidden">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600 rounded-full filter blur-[100px] opacity-30"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600 rounded-full filter blur-[100px] opacity-25"></div>
+
+        <div class="relative bg-white/10 backdrop-blur-xl p-8 rounded-2xl shadow-2xl max-w-md w-full border border-white/10 z-10">
+            <div class="text-center mb-6">
+                <div class="inline-flex p-3 bg-blue-500/20 text-blue-400 rounded-2xl mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 id="auth-title" class="text-2xl font-bold text-white tracking-tight">MySavings Auth</h2>
+                <p id="auth-subtitle" class="text-sm text-slate-400 mt-1">Silakan masuk untuk mengakses dashboard finansial</p>
+            </div>
+
+            <div id="notif-auth" class="hidden mb-4 p-3 rounded-xl text-xs font-medium text-center"></div>
+
+            <form id="form-otentikasi" class="space-y-4">
+                <div id="box-input-nama" class="hidden">
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-nama-lengkap" placeholder="Masukkan nama asli Anda" class="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Username</label>
+                    <input type="text" id="input-username" required placeholder="Contoh: admin" class="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Password</label>
+                    <input type="password" id="input-password" required placeholder="••••••••" class="w-full px-4 py-2.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500 text-sm">
+                </div>
+                <button type="submit" id="btn-submit-auth" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm transition transform active:scale-95 mt-2">
+                    Masuk Sekarang
+                </button>
+            </form>
+
+            <div class="text-center mt-6 text-xs text-slate-400 border-t border-white/10 pt-4">
+                <p id="teks-bawah-auth">Belum punya akun? <a href="#" onclick="ubahModeAuth(true)" class="text-blue-400 font-semibold hover:underline">Daftar Akun Baru</a></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="halaman-dashboard" class="hidden min-h-screen">
+        <nav class="bg-blue-600 text-white shadow-md py-4 px-6 mb-6">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold tracking-wide">💳 MySavings <span class="text-xs font-normal bg-blue-800 px-2 py-1 rounded ml-2">v12.0-PredictiveAI</span></h1>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p id="nama-user-navbar" class="text-sm font-semibold">Memuat...</p>
+                        <p class="text-[10px] text-blue-200 uppercase font-mono tracking-wider">Sistem Terautentikasi</p>
+                    </div>
+                    <button type="button" onclick="keluarSistem()" class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition cursor-pointer">
+                        🚪 Keluar
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-6xl mx-auto px-4 space-y-6">
+
+            <div id="area-laporan" class="space-y-6 p-4 bg-white rounded-xl">
+
+                <div class="hidden id-header-pdf border-b-4 border-double border-slate-900 pb-4 mb-6">
+                    <div class="text-center">
+                        <h1 class="text-2xl font-bold text-slate-900 uppercase tracking-tight">Laporan Eksekutif & Prediksi Cerdas Finansial</h1>
+                        <p class="text-sm text-slate-600 mt-0.5">Sistem Pendukung Keputusan Berbasis Jurnal Digital MySavings</p>
+                        <div class="flex justify-between items-center mt-4 text-xs font-mono text-slate-700 bg-slate-100 p-2 rounded-lg">
+                            <p>Sifat: Lampiran Tugas Akhir / Akurasi Analitis</p>
+                            <p>Pemilik Akun: <span id="pdf-nama-pemilik" class="font-bold uppercase text-blue-700"></span></p>
+                            <p>Tanggal Cetak: <span id="pdf-tanggal-cetak" class="font-bold"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dashboard-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Dompet Utama (Siap Pakai)</p>
+                        <h3 id="saldo-aktif" class="text-xl font-bold text-blue-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm bg-amber-50/30">
+                        <p class="text-xs font-semibold text-amber-600 uppercase">🚨 Pos Dana Darurat</p>
+                        <h3 id="total-darurat" class="text-xl font-bold text-amber-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Tabungan Celengan</p>
+                        <h3 id="total-tabungan" class="text-xl font-bold text-emerald-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400 uppercase">Total Pengeluaran Hidup</p>
+                        <h3 id="total-pengeluaran" class="text-xl font-bold text-rose-600 mt-1">Rp 0</h3>
+                    </div>
+                </div>
+
+                <div id="bi-dashboard-widgets" class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">🔥 Rasio Tabungan (Saving Rate)</p>
+                            <h4 id="widget-saving-rate" class="text-2xl font-black text-slate-800 mt-1">0%</h4>
+                        </div>
+                        <div class="mt-2">
+                            <span id="badge-saving-status" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Memproses...</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">📈 Rata-rata Nilai Transaksi</p>
+                        <h4 id="widget-avg-tx" class="text-xl font-bold text-slate-700 mt-1">Rp 0</h4>
+                        <p class="text-[10px] text-slate-400 mt-2">Berdasarkan total aktivitas log</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">🎯 Sektor Pengeluaran Terbesar</p>
+                        <h4 id="widget-top-expense" class="text-md font-bold text-rose-600 truncate mt-1.5">-</h4>
+                        <p class="text-[10px] text-slate-400 mt-1">Kategori konsumsi paling dominan</p>
+                    </div>
+                </div>
+
+                <div id="modul-kecerdasan-buatan" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gradient-to-r from-blue-900 to-indigo-950 p-5 rounded-xl text-white shadow-md">
+                    <div class="md:col-span-1 border-b md:border-b-0 md:border-r border-white/20 pb-4 md:pb-0 md:pr-4">
+                        <p class="text-xs font-mono uppercase text-blue-300 tracking-widest">🔮 Analisis Prediktif (1 Bulan Kedepan)</p>
+                        <h3 class="text-xs text-slate-300 mt-2">Estimasi Saldo Dompet Utama Anda Selanjutnya:</h3>
+                        <h2 id="prediksi-saldo-besok" class="text-2xl font-black text-emerald-400 mt-1">Rp 0</h2>
+                        <p class="text-[10px] text-slate-400 mt-2 font-serif italic">*Menggunakan Rumus Proyeksi Linear Tren Arus Surplus.</p>
+                    </div>
+                    <div class="md:col-span-2 md:pl-2 flex flex-col justify-between">
+                        <div>
+                            <p class="text-xs font-mono uppercase text-amber-400 tracking-widest">🤖 Rekomendasi Sistem Otomatis (AI Advisor)</p>
+                            <p id="teks-ai-advisor" class="text-sm font-medium text-slate-200 mt-2 leading-relaxed">
+                                Sedang mengevaluasi kesehatan finansial dan menyeimbangkan rasio anggaran...
+                            </p>
+                        </div>
+                        <div class="text-[10px] text-blue-200 bg-white/10 px-3 py-1.5 rounded-md mt-3 w-fit">
+                            💡 <strong>Saran Strategi:</strong> Selalu amankan porsi tabungan di awal bulan.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tabel-neraca-pdf" class="hidden mb-6">
+                    <h3 class="text-md font-bold text-slate-800 uppercase tracking-wider mb-2 border-b pb-1">I. Ringkasan Posisi Kas (Neraca Saldo)</h3>
+                    <table class="w-full text-left border border-slate-300 text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 border-b border-slate-300 text-xs uppercase font-bold text-slate-700">
+                                <th class="py-2.5 px-4 border-r border-slate-300">Uraian Akun Keuangan</th>
+                                <th class="py-2.5 px-4 border-r border-slate-300">Status Alokasi</th>
+                                <th class="py-2.5 px-4 text-right">Total Akumulasi Nilai</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-300 font-medium">
+                            <tr>
+                                <td class="py-2 px-4 border-r border-slate-300">Dompet Utama (Sisa Uang Siap Pakai)</td>
+                                <td class="py-2 px-4 border-r border-slate-300 text-blue-600 text-xs font-semibold">LIKUID / AKTIF</td>
+                                <td id="pdf-neraca-saldo" class="py-2 px-4 text-right text-blue-600 font-bold">Rp 0</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-4 border-r border-slate-300">Pos Alokasi Dana Darurat</td>
+                                <td class="py-2 px-4 border-r border-slate-300 text-amber-600 text-xs font-semibold">CADANGAN AMAN</td>
+                                <td id="pdf-neraca-darurat" class="py-2 px-4 text-right text-amber-600 font-bold">Rp 0</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-4 border-r border-slate-300">Tabungan / Celengan Terpaku</td>
+                                <td class="py-2 px-4 border-r border-slate-300 text-emerald-600 text-xs font-semibold">INVESTASI / SIMPANAN</td>
+                                <td id="pdf-neraca-tabungan" class="py-2 px-4 text-right text-emerald-600 font-bold">Rp 0</td>
+                            </tr>
+                            <tr class="bg-rose-50/20">
+                                <td class="py-2 px-4 border-r border-slate-300 font-bold text-slate-700">Total Pengeluaran Kebocoran Kas (Jajan/Harian)</td>
+                                <td class="py-2 px-4 border-r border-slate-300 text-rose-600 text-xs font-semibold">BEBAN KONSUMSI</td>
+                                <td id="pdf-neraca-pengeluaran" class="py-2 px-4 text-right text-rose-600 font-bold">Rp 0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="container-grafik" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 id="judul-grafik" class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                        📊 Visualisasi Aliran Arus Kas Masuk & Keluar
+                    </h3>
+                    <div class="relative w-full h-64 md:h-72">
+                        <canvas id="grafikFinansial"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div id="panel-input-form" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit">
+                        <h2 class="text-lg font-bold mb-4 border-b pb-2 text-blue-700">Catat Arus Uang</h2>
+                        <form id="form-transaksi" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Keterangan Transaksi</label>
+                                <input type="text" id="deskripsi" required placeholder="Contoh: Kiriman Bulanan, Beli Bakso" class="w-full px-3 py-2 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Aliran Dana</label>
+                                <select id="jenis" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 font-medium">
+                                    <option value="pemasukan" class="text-blue-600 font-semibold">➕ Masuk ke Dompet Utama</option>
+                                    <option value="simpan_darurat" class="text-amber-600 font-semibold">🚨 Alokasikan ke Dana Darurat</option>
+                                    <option value="tabungan" class="text-emerald-600 font-semibold">🔒 Sisihkan ke Celengan</option>
+                                    <option value="pengeluaran" class="text-rose-600 font-semibold">➖ Pengeluaran Jajan/Harian</option>
+                                    <option value="pakai_darurat" class="text-purple-600 font-semibold">⚠️ Pakai Dana Darurat</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Nominal (Rp)</label>
+                                <input type="number" id="nominal" required min="1" placeholder="Masukkan angka" class="w-full px-3 py-2 border rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-1">Kategori</label>
+                                <select id="kategori" class="w-full px-3 py-2 border rounded-lg text-sm">
+                                    <option value="Pendapatan">💼 Pendapatan Utama</option>
+                                    <option value="Kesehatan & Musibah">🏥 Medis / Musibah</option>
+                                    <option value="Tabungan">🐷 Celengan / Investasi</option>
+                                    <option value="Kebutuhan Pokok">🍔 Makan & Minum</option>
+                                    <option value="Tagihan Tetap">🌐 Internet & Kost</option>
+                                    <option value="Gaya Hidup">🎮 Hiburan & Game</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-sm shadow-sm transition cursor-pointer">
+                                ⚡ Proses Transaksi
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="panel-tabel-log" class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm md:col-span-2 h-fit">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-4 mb-4 gap-2">
+                            <h2 id="judul-tabel-riwayat" class="text-lg font-bold text-slate-700">Riwayat Finansial (Log Tabel)</h2>
+                            <button type="button" onclick="exportLaporanPDF()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-md transform active:scale-95 cursor-pointer">
+                                📄 Cetak Laporan PDF
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table id="tabel-utama-riwayat" class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        <th class="py-3 px-4 border-b">Deskripsi Kegiatan</th>
+                                        <th class="py-3 px-4 border-b">Kategori</th>
+                                        <th class="py-3 px-4 text-right border-b">Nominal</th>
+                                        <th class="py-3 px-4 text-center border-b class-aksi-th">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-body" class="divide-y divide-slate-100 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </section>
+
+    <script>
+        let isRegisterMode = false;
+        let daftarUser = [{
+            username: "admin",
+            password: "125",
+            nama: "Irfan Dwi Fahrezi"
+        }];
+        let userAktif = null;
+        let chartInstance = null;
+
+        let databaseDompet = [{
+            deskripsi: "Transfer Bulanan Pokok",
+            jenis: "pemasukan",
+            nominal: 2500000,
+            kategori: "Pendapatan"
+        }, {
+            deskripsi: "Amankan Pos Dana Darurat",
+            jenis: "simpan_darurat",
+            nominal: 500000,
+            kategori: "Kesehatan & Musibah"
+        }, {
+            deskripsi: "Sisihkan ke Celengan",
+            jenis: "tabungan",
+            nominal: 300000,
+            kategori: "Tabungan"
+        }, {
+            deskripsi: "Bayar Internet Bulanan",
+            jenis: "pengeluaran",
+            nominal: 250000,
+            kategori: "Tagihan Tetap"
+        }, {
+            deskripsi: "Beli Bakso & Es Teh",
+            jenis: "pengeluaran",
+            nominal: 35000,
+            kategori: "Kebutuhan Pokok"
+        }];
+
+        const formAuth = document.getElementById('form-otentikasi');
+        const formTransaksi = document.getElementById('form-transaksi');
+        const tabelBody = document.getElementById('tabel-body');
+        const notifAuth = document.getElementById('notif-auth');
+
+        function ubahModeAuth(keRegister) {
+            isRegisterMode = keRegister;
+            notifAuth.classList.add('hidden');
+            const title = document.getElementById('auth-title');
+            const boxNama = document.getElementById('box-input-nama');
+            const btnSubmit = document.getElementById('btn-submit-auth');
+            const teksBawah = document.getElementById('teks-bawah-auth');
+
+            if (isRegisterMode) {
+                title.innerText = "Daftar Akun Baru";
+                boxNama.classList.remove('hidden');
+                document.getElementById('input-nama-lengkap').required = true;
+                btnSubmit.innerText = "Daftar Sekarang";
+                teksBawah.innerHTML = `Sudah punya akun? <a href="#" onclick="ubahModeAuth(false)" class="text-blue-400 font-semibold hover:underline">Masuk di sini</a>`;
+            } else {
+                title.innerText = "MySavings Auth";
+                boxNama.classList.add('hidden');
+                document.getElementById('input-nama-lengkap').required = false;
+                btnSubmit.innerText = "Masuk Sekarang";
+                teksBawah.innerHTML = `Belum punya akun? <a href="#" onclick="ubahModeAuth(true)" class="text-blue-400 font-semibold hover:underline">Daftar Akun Baru</a>`;
+            }
+        }
+
+        formAuth.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usernameIn = document.getElementById('input-username').value.trim();
+            const passwordIn = document.getElementById('input-password').value;
+            const namaIn = document.getElementById('input-nama-lengkap').value.trim();
+
+            if (isRegisterMode) {
+                daftarUser.push({
+                    username: usernameIn,
+                    password: passwordIn,
+                    nama: namaIn || usernameIn
+                });
+                tampilkanNotif("Akun berhasil dibuat! Silakan login.", "bg-emerald-500/20", "text-emerald-400");
+                setTimeout(() => ubahModeAuth(false), 1000);
+            } else {
+                const userKetemu = daftarUser.find(u => u.username.toLowerCase() === usernameIn.toLowerCase() && u.password === passwordIn);
+                if (userKetemu) {
+                    userAktif = userKetemu;
+                    document.getElementById('halaman-login').classList.add('hidden');
+                    document.getElementById('halaman-dashboard').classList.remove('hidden');
+                    document.getElementById('nama-user-navbar').innerText = userAktif.nama;
+                    document.getElementById('pdf-nama-pemilik').innerText = userAktif.nama;
+                    formAuth.reset();
+                    hitungUangOtomatis();
+                } else {
+                    tampilkanNotif("Username atau Password salah!", "bg-rose-500/20", "text-rose-400");
+                }
+            }
+        });
+
+        function tampilkanNotif(pesan, bg, teks) {
+            notifAuth.innerText = pesan;
+            notifAuth.className = `mb-4 p-3 rounded-xl text-xs font-medium text-center ${bg} ${teks}`;
+            notifAuth.classList.remove('hidden');
+        }
+
+        function keluarSistem() {
+            if (confirm("Keluar dari sistem?")) {
+                userAktif = null;
+                document.getElementById('halaman-dashboard').classList.add('hidden');
+                document.getElementById('halaman-login').classList.remove('hidden');
+                ubahModeAuth(false);
+            }
+        }
+
+        function formatRupiah(angka) {
+            return 'Rp ' + Math.abs(angka).toLocaleString('id-ID');
+        }
+
+        function hitungUangOtomatis() {
+            let totalMasuk = 0;
+            let totalDaruratMasuk = 0;
+            let totalDaruratKeluar = 0;
+            let totalSimpananCelengan = 0;
+            let totalKeluarHarian = 0;
+            let sumNominalAll = 0;
+            let kategoriMap = {};
+
+            tabelBody.innerHTML = '';
+            let labelGrafik = [];
+            let dataPertambahanPemasukan = [];
+            let dataPengeluaranHarian = [];
+
+            databaseDompet.forEach((item, index) => {
+                sumNominalAll += item.nominal;
+
+                if (item.jenis === 'pemasukan') totalMasuk += item.nominal;
+                else if (item.jenis === 'simpan_darurat') totalDaruratMasuk += item.nominal;
+                else if (item.jenis === 'tabungan') totalSimpananCelengan += item.nominal;
+                else if (item.jenis === 'pengeluaran') {
+                    totalKeluarHarian += item.nominal;
+                    kategoriMap[item.kategori] = (kategoriMap[item.kategori] || 0) + item.nominal;
+                } else if (item.jenis === 'pakai_darurat') totalDaruratKeluar += item.nominal;
+
+                labelGrafik.push(item.deskripsi.substring(0, 15) + "...");
+                dataPertambahanPemasukan.push(item.jenis === 'pemasukan' ? item.nominal : 0);
+                dataPengeluaranHarian.push(item.jenis === 'pengeluaran' ? item.nominal : 0);
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                let gayaWarna = 'text-slate-800';
+                let simbol = '';
+                if (item.jenis === 'pemasukan') {
+                    gayaWarna = 'text-blue-600 font-semibold';
+                    simbol = '+';
+                } else if (item.jenis === 'simpan_darurat') {
+                    gayaWarna = 'text-amber-600';
+                    simbol = '🚨';
+                } else if (item.jenis === 'tabungan') {
+                    gayaWarna = 'text-emerald-600';
+                    simbol = '🔒';
+                } else if (item.jenis === 'pakai_darurat') {
+                    gayaWarna = 'text-purple-600 font-semibold';
+                    simbol = '⚠️';
+                } else {
+                    gayaWarna = 'text-rose-600';
+                    simbol = '-';
+                }
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-medium text-slate-800">${item.deskripsi}</td>
+                    <td class="py-3.5 px-4"><span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md font-medium">${item.kategori}</span></td>
+                    <td class="py-3.5 px-4 text-right ${gayaWarna}">${simbol} ${formatRupiah(item.nominal)}</td>
+                    <td class="py-3.5 px-4 text-center class-aksi-td">
+                        <button type="button" onclick="hapusBaris(${index})" class="text-rose-500 hover:text-rose-700 font-medium text-xs cursor-pointer">Hapus</button>
+                    </td>
+                `;
+                tabelBody.appendChild(tr);
+            });
+
+            let sisaDarurat = totalDaruratMasuk - totalDaruratKeluar;
+            let sisaSaldoAktif = totalMasuk - totalDaruratMasuk - totalSimpananCelengan - totalKeluarHarian;
+
+            // Render ke kotak saldo utama
+            document.getElementById('saldo-aktif').innerText = formatRupiah(sisaSaldoAktif);
+            document.getElementById('total-darurat').innerText = formatRupiah(sisaDarurat);
+            document.getElementById('total-tabungan').innerText = formatRupiah(totalSimpananCelengan);
+            document.getElementById('total-pengeluaran').innerText = formatRupiah(totalKeluarHarian);
+
+            document.getElementById('pdf-neraca-saldo').innerText = formatRupiah(sisaSaldoAktif);
+            document.getElementById('pdf-neraca-darurat').innerText = formatRupiah(sisaDarurat);
+            document.getElementById('pdf-neraca-tabungan').innerText = formatRupiah(totalSimpananCelengan);
+            document.getElementById('pdf-neraca-pengeluaran').innerText = formatRupiah(totalKeluarHarian);
+
+            // Perhitungan KPI Statis
+            let totalDanaTersimpan = totalSimpananCelengan + sisaDarurat;
+            let rasioMenabung = totalMasuk > 0 ? Math.round((totalDanaTersimpan / totalMasuk) * 100) : 0;
+            document.getElementById('widget-saving-rate').innerText = rasioMenabung + "%";
+
+            let badgeStatus = document.getElementById('badge-saving-status');
+            if (rasioMenabung >= 30) {
+                badgeStatus.innerText = "🟢 SEHAT / IDEAL";
+                badgeStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+            } else if (rasioMenabung >= 15) {
+                badgeStatus.innerText = "🟡 AMAN / STANDAR";
+                badgeStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
+            } else {
+                badgeStatus.innerText = "🔴 BOROS / WASPADA";
+                badgeStatus.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700";
+            }
+
+            let rataRataTx = databaseDompet.length > 0 ? Math.round(sumNominalAll / databaseDompet.length) : 0;
+            document.getElementById('widget-avg-tx').innerText = formatRupiah(rataRataTx);
+
+            let topKategori = "-";
+            let maxNilai = 0;
+            for (let kat in kategoriMap) {
+                if (kategoriMap[kat] > maxNilai) {
+                    maxNilai = kategoriMap[kat];
+                    topKategori = kat;
+                }
+            }
+            document.getElementById('widget-top-expense').innerText = topKategori !== "-" ? `${topKategori} (${formatRupiah(maxNilai)})` : "Belum Ada Pengeluaran";
+
+            // =======================================================
+            // NEW LOGIKA: ENGINE ANALISIS PREDIKTIF & RULE-BASED SPK
+            // =======================================================
+
+            // 1. Rumus Forecasting Sederhana (Prediksi Bulan Depan)
+            // Mengestimasi sisa saldo bulan depan = Saldo Sekarang + (Rata-rata surplus pemasukan bersih saat ini)
+            let surplusBersih = totalMasuk - totalKeluarHarian;
+            let estimasiSaldoBulanDepan = sisaSaldoAktif + (surplusBersih > 0 ? surplusBersih : 0);
+            document.getElementById('prediksi-saldo-besok').innerText = formatRupiah(estimasiSaldoBulanDepan);
+
+            // 2. Rule-Based AI Advisor Text Logic
+            let teksPenasihat = "";
+            if (sisaSaldoAktif < 200000) {
+                teksPenasihat = "🚨 <strong>Kritis!</strong> Dompet utama Anda sangat tipis. Sistem menyarankan untuk segera menghentikan pengeluaran non-pokok seperti kategori 'Gaya Hidup' (Top Up Game/TikTok Coins/Flavored Tea) dan fokus mencari tambahan pendapatan pokok.";
+            } else if (rasioMenabung < 15) {
+                teksPenasihat = "⚠️ <strong>Alokasi Terlalu Rendah.</strong> Pendapatan Anda sebenarnya cukup, namun kebocoran pada sektor '" + (topKategori !== "-" ? topKategori : "Konsumsi") + "' terlalu tinggi. Batasi jajan harian/Mi Gacoan agar modal aman untuk dialokasikan ke Pos Celengan Tabungan.";
+            } else if (rasioMenabung >= 30 && sisaSaldoAktif > 1000000) {
+                teksPenasihat = "🚀 <strong>Sempurna!</strong> Manajemen finansial Anda sangat luar biasa sehat. Sisa dana likuid Anda melimpah. Sistem merekomendasikan Anda untuk mulai mempelajari instrumen investasi jangka menengah seperti Logam Mulia/Emas, Forex (Cent/Premium Account), atau Aset Kripto untuk melawan inflasi.";
+            } else {
+                teksPenasihat = "✅ <strong>Stabil.</strong> Arus keuangan terpantau seimbang dan normal. Tetap disiplin melakukan pencatatan log finansial secara berkala agar tidak terjadi pembengkakan tak terduga.";
+            }
+            document.getElementById('teks-ai-advisor').innerHTML = teksPenasihat;
+
+            // Update Grafik Chart.js
+            updateGrafikFinansial(labelGrafik, dataPertambahanPemasukan, dataPengeluaranHarian);
+        }
+
+        function updateGrafikFinansial(labels, dataMasuk, dataKeluar) {
+            const ctx = document.getElementById('grafikFinansial').getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pertambahan Pemasukan (Rp)',
+                        data: dataMasuk,
+                        type: 'line',
+                        borderColor: '#2563eb',
+                        borderWidth: 3,
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }, {
+                        label: 'Beban Pengeluaran Jajan (Rp)',
+                        data: dataKeluar,
+                        backgroundColor: '#e11d48',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(val) {
+                                    return 'Rp ' + val.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        formTransaksi.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const deskripsi = document.getElementById('deskripsi').value;
+            const jenis = document.getElementById('jenis').value;
+            const nominal = parseInt(document.getElementById('nominal').value);
+            const kategori = document.getElementById('kategori').value;
+
+            databaseDompet.push({
+                deskripsi,
+                jenis,
+                nominal,
+                kategori
+            });
+            formTransaksi.reset();
+            hitungUangOtomatis();
+        });
+
+        window.hapusBaris = function(index) {
+            databaseDompet.splice(index, 1);
+            hitungUangOtomatis();
+        };
+
+        // EXPORT PDF LAPORAN LENGKAP + GRAFIK + AI PREDIKSI
+        function exportLaporanPDF() {
+            const elemenLaporan = document.getElementById('area-laporan');
+            const dashboardCards = document.getElementById('dashboard-cards');
+            const tabelNeracaPdf = document.getElementById('tabel-neraca-pdf');
+            const panelInputForm = document.getElementById('panel-input-form');
+            const panelTabelLog = document.getElementById('panel-tabel-log');
+            const judulRiwayat = document.getElementById('judul-tabel-riwayat');
+            const tabelUtamaRiwayat = document.getElementById('tabel-utama-riwayat');
+            const judulGrafik = document.getElementById('judul-grafik');
+
+            const hariIni = new Date().toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('pdf-tanggal-cetak').innerText = hariIni;
+
+            dashboardCards.classList.add('hidden');
+            tabelNeracaPdf.classList.remove('hidden');
+            panelInputForm.classList.add('hidden');
+            panelTabelLog.classList.remove('md:col-span-2');
+
+            judulGrafik.innerText = "II. Analisis Grafik Aliran Kas Keuangan";
+            judulRiwayat.innerText = "III. Jurnal Historis Transaksi Finansial Lengkap";
+            tabelUtamaRiwayat.classList.add('border', 'border-slate-300');
+
+            document.querySelectorAll('.class-aksi-td').forEach(el => el.classList.add('hidden'));
+            document.querySelector('.class-aksi-th').classList.add('hidden');
+            document.querySelector('button[onclick="exportLaporanPDF()"]').classList.add('hidden');
+
+            const headerPdf = document.querySelector('.id-header-pdf');
+            headerPdf.classList.remove('hidden');
+
+            const opsiKonfigurasi = {
+                margin: 12,
+                filename: 'Laporan_Ultimate_MySavings_AI.pdf',
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
+            html2pdf().set(opsiKonfigurasi).from(elemenLaporan).save().then(() => {
+                dashboardCards.classList.remove('hidden');
+                tabelNeracaPdf.classList.add('hidden');
+                panelInputForm.classList.remove('hidden');
+                panelTabelLog.classList.add('md:col-span-2');
+                judulGrafik.innerText = "📊 Visualisasi Aliran Arus Kas Masuk & Keluar";
+                judulRiwayat.innerText = "Riwayat Finansial (Log Tabel)";
+                tabelUtamaRiwayat.classList.remove('border', 'border-slate-300');
+                headerPdf.classList.add('hidden');
+
+                document.querySelectorAll('.class-aksi-td').forEach(el => el.classList.remove('hidden'));
+                document.querySelector('.class-aksi-th').classList.remove('hidden');
+                document.querySelector('button[onclick="exportLaporanPDF()"]').classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+
+</html>
